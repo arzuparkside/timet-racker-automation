@@ -5,9 +5,11 @@ describe('Tracking page', () => {
     cy.get('#password').type('');
     cy.get('#kc-login').click();
 
-    const date = new Date().toISOString();
+    // const date = new Date().toISOString();
 
-    cy.get('textarea[formcontrolname=description]').type(`Test Automation Time Entry - ${date}`);
+    const description = `Test Automation Time Entry`;
+
+    cy.get('textarea[formcontrolname=description]').type(description);
 
     cy.get('[formcontrolname=projectId] [role=combobox]').click();
 
@@ -20,5 +22,11 @@ describe('Tracking page', () => {
     cy.get('[formcontrolname=minutesFormatted]').clear().type('8:00');
 
     cy.get('button[type=submit].add-btn').click();
+
+    cy.get('.mat-row:nth-child(2) *[role=cell]:not([class*=mat-column-actions])').then(firstRowColumns => {
+      return Cypress.$.makeArray(firstRowColumns).map(column => column.textContent);
+    }).then(columnTexts => {
+      expect(columnTexts).to.deep.equal([description, ' Minion  D&D ' , 'Quality Assurance', ' 08:00 '])
+    })
   })
 });
