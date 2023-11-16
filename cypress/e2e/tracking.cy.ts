@@ -1,8 +1,8 @@
 describe('Tracking page', () => {
   it('should add a time entry', () => {
     cy.visit('/');
-    cy.get('#username').type('');
-    cy.get('#password').type('');
+    cy.get('#username').type('timetrackertestautomation@gmail.com');
+    cy.get('#password').type('NLQyrNEWy6pat5');
     cy.get('#kc-login').click();
 
     // const date = new Date().toISOString();
@@ -31,11 +31,30 @@ describe('Tracking page', () => {
   })
 
   it('should check content of Reports page', () => {
-    cy.get('h5.header'); // Reports header
+     cy.visit('/');
+     cy.get('#username').type('timetrackertestautomation@gmail.com');
+     cy.get('#password').type('NLQyrNEWy6pat5');
+     cy.get('#kc-login').click();
+    
+    
+    cy.get('[routerlink="/reports"]').click();
+  
+    cy.get('h5.header').should('have.text', 'Reports');
+    
+
+    });
+
+
   });
 
   it('should check that Filter/Group button opens a form', () => {
-    cy.get('[data-mat-icon-name=filter_list]'); // Filter/Group filter button (does not include the text, which is fine because we just want to click it)
-    cy.get('#filtersContainer form'); // The form which appears after clicking the Filter/Group filter button
+    cy.visit('/');
+     cy.get('#username').type('timetrackertestautomation@gmail.com');
+     cy.get('#password').type('NLQyrNEWy6pat5');
+     cy.get('#kc-login').click();
+     cy.get('[routerlink="/reports"]').click();
+
+    cy.get('[data-mat-icon-name="filter_list"]').click(); // Filter/Group filter button (does not include the text, which is fine because we just want to click it)
+    cy.get('#filtersContainer').should('be.visible'); // The form which appears after clicking the Filter/Group filter button
   });
-});
+;
