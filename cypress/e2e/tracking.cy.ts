@@ -1,60 +1,89 @@
+import { ClientPageObject } from "../page-objects/clients.pageobject";
+import { LeftSideBar } from "../page-objects/left-side-bar.pageobject";
+import { LoginPageObject } from "../page-objects/login.pageobject";
+import { ProjectsPageObject } from "../page-objects/projects.pageobject";
+import { ReportPageObject } from "../page-objects/report.pageobject";
+import { TrackingPageObject } from "../page-objects/tracking.pageobject";
+
 describe('Tracking page', () => {
-  it('should add a time entry', () => {
-    cy.visit('/');
-    cy.get('#username').type('timetrackertestautomation@gmail.com');
-    cy.get('#password').type('NLQyrNEWy6pat5');
-    cy.get('#kc-login').click();
+  const loginPage = new LoginPageObject();
+  const leftSideBar = new LeftSideBar();
+  const reportPage = new ReportPageObject();
+  const projectsPage = new ProjectsPageObject();
+  const clientsPage = new ClientPageObject();
 
-    // const date = new Date().toISOString();
-
-    const description = `Test Automation Time Entry`;
-
-    cy.get('textarea[formcontrolname=description]').type(description);
-
-    cy.get('[formcontrolname=projectId] [role=combobox]').click();
-
-    cy.get('[role=option]').contains('Minion').click();
-
-    cy.get('[formcontrolname=serviceId] [role=combobox]').click();
-
-    cy.get('[role=option]').contains('Quality Assurance').click();
-
-    cy.get('[formcontrolname=minutesFormatted]').clear().type('8:00');
-
-    cy.get('button[type=submit].add-btn').click();
-
-    cy.get('.mat-row:nth-child(2) *[role=cell]:not([class*=mat-column-actions])').then(firstRowColumns => {
-      return Cypress.$.makeArray(firstRowColumns).map(column => column.textContent);
-    }).then(columnTexts => {
-      expect(columnTexts).to.deep.equal([description, ' Minion  D&D ' , 'Quality Assurance', ' 08:00 '])
-    })
+  beforeEach(()=>{
+    loginPage.visit();
+    loginPage.typeUsername();
+    loginPage.typePassword();
+    loginPage.clickSignIn();
   })
 
-  it('should check content of Reports page', () => {
-     cy.visit('/');
-     cy.get('#username').type('timetrackertestautomation@gmail.com');
-     cy.get('#password').type('NLQyrNEWy6pat5');
-     cy.get('#kc-login').click();
-    
-    
-    cy.get('[routerlink="/reports"]').click();
-  
-    cy.get('h5.header').should('have.text', 'Reports');
-    
+  it('should add a time entry', () => {
+    const trackingPage = new TrackingPageObject(); 
+    const description = `A-Test Automation Time Entry`;
+    const projectName = 'Minion';
+    const service = 'Quality Assurance';
+    const hours = ' 08:00 ';
+    const inputValues = [description, ' Minion  D&D ' , service, hours]
 
-    });
+    trackingPage.typeDescription(description)
+    trackingPage.chooseProject(projectName);
+    trackingPage.chooseService(service);
+    trackingPage.fillHoursTextBox(hours);
+    trackingPage.submit();
+    trackingPage.checkInput(inputValues); 
+   })
 
-
+  it('should check content of Reports page', () => { 
+    leftSideBar.clickReportItem();
+    reportPage.checkHeader('Reports');
   });
 
-  it('should check that Filter/Group button opens a form', () => {
-    cy.visit('/');
-     cy.get('#username').type('timetrackertestautomation@gmail.com');
-     cy.get('#password').type('NLQyrNEWy6pat5');
-     cy.get('#kc-login').click();
-     cy.get('[routerlink="/reports"]').click();
-
-    cy.get('[data-mat-icon-name="filter_list"]').click(); // Filter/Group filter button (does not include the text, which is fine because we just want to click it)
-    cy.get('#filtersContainer').should('be.visible'); // The form which appears after clicking the Filter/Group filter button
+  it('should check that Filter/Group button opens a form', () => {   
+    leftSideBar.clickReportItem();
+    reportPage.clickFilterButton();
+    reportPage.checkFilterContainer(); 
   });
-;
+
+  it('should search for sth', () => {
+    leftSideBar.clickProjectsItem();
+    projectsPage.checkHeader('Projects');
+    projectsPage.checkSearchTextBox();
+    projectsPage.fillSearchTextBox('Minion');
+});
+
+  it('should search for a client', () => {
+    leftSideBar.clickClientsItem();
+    clientsPage.checkHeader('Clients');
+    clientsPage.checkSearchTextBox();
+    clientsPage.fillSearchTextBox('Parkside');
+    clientsPage.checkNameColumnItemsTexts(['Parkside']);
+ });
+
+  it('should check the list  of active clients', () => {
+    leftSideBar.clickClientsItem();
+    clientsPage.checkHeader('Clients');
+    clientsPage.chooseFilter('Active');
+    clientsPage.chooseFilter('Archived');
+    clientsPage.checkNameColumnItemsTexts(['D&D', 'test archived client', 'CustomBack', 'claudias client 123', 'sdf', 'TestPc', 'paulo test client', 'Test Currency Client', 'Lisa Client Nr. 1']);
+  })
+
+  it('should check the list  of active projects', () => {    
+    leftSideBar.clickProjectsItem();
+    projectsPage.checkHeader('Projects');
+    projectsPage.chooseFilter('Active');
+    projectsPage.chooseFilter('Archived');
+    cy.wait(10000);
+    projectsPage.checkNameColumnItemsTexts(['Branding', 'Marketing', 'SPS 50', 'Minion', 'TV Plataform', 'Feature - Testing', 'MobileApp', 'Test4Dev Software', 'Test4QA', '3DPrinter'])
+  })
+
+  it('should check attributes of each element in project page', () => {
+    cy.get('[routerlink="/projects"').click();
+    cy.get('h5.header').should('have.text','Projects');
+    cy.get('.justify-between .mat-select-value .mat-select-min-line').should('have.text','Active').click()
+    cy.get('[role="listbox"]').contains('Archived').click()
+    cy.wait(10000)
+    cy.get('.mat-cell.mat-column-name').should('have.length', 10).each((element,index) => {cy.wrap(element).should('have.attr', 'role', "cell")})
+  })
+})
