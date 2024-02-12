@@ -75,15 +75,15 @@ describe('Tracking page', () => {
     projectsPage.chooseFilter('Active');
     projectsPage.chooseFilter('Archived');
     cy.wait(10000);
-    projectsPage.checkNameColumnItemsTexts(['Branding', 'Marketing', 'SPS 50', 'Minion', 'TV Plataform', 'Feature - Testing', 'MobileApp', 'Test4Dev Software', 'Test4QA', '3DPrinter'])
+    projectsPage.checkNameColumnItemsTexts(['Branding', 'Marketing', 'TV Plataform', 'Feature - Testing', 'MobileApp', 'Test4Dev Software', 'Test4QA', '3DPrinter', 'TestX', 'Claudias project 1'])
   })
 
   it('should check attributes of each element in project page', () => {
-    cy.get('[routerlink="/projects"').click();
-    cy.get('h5.header').should('have.text','Projects');
-    cy.get('.justify-between .mat-select-value .mat-select-min-line').should('have.text','Active').click()
-    cy.get('[role="listbox"]').contains('Archived').click()
-    cy.wait(10000)
-    cy.get('.mat-cell.mat-column-name').should('have.length', 10).each((element,index) => {cy.wrap(element).should('have.attr', 'role', "cell")})
+    leftSideBar.clickProjectsItem();
+    projectsPage.checkHeader('Projects');
+    projectsPage.chooseFilter('Active');
+    projectsPage.chooseFilter('Archived');
+    cy.wait(1000);
+    projectsPage.checkAttributeColumnItems(10, 'role', 'cell')
   })
 })

@@ -22,4 +22,8 @@ export class SearchFilterTablePageObject extends BasePageObject{
     public checkNameColumnItemsTexts(expectedTexts: string[]){
         this.nameColumnItems().should('have.length', expectedTexts.length).each((element,index) => {cy.wrap(element).should('have.text',expectedTexts[index])})
     }
+
+    public checkAttributeColumnItems(expectedLength: number, attributeName: string, attributeValue: string ){
+        this.nameColumnItems().should('have.length', expectedLength).each((element,index) => {cy.wrap(element).should('have.attr', attributeName, attributeValue)})
+    }
 }
